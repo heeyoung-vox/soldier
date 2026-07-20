@@ -47,16 +47,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: soldier-backend-jar
-
+      - name: Rename JAR to app.jar
+        run: |
+          mv *.jar app.jar
       - name: Copy JAR to Amazon Linux EC2 via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USERNAME }}
           key: ${{ secrets.DEV_SSH_KEY }}
-          source: "*.jar"
-          target: "/home/ec2-user/app/app.jar"
-          strip_components: 1
+          source: "app.jar"
+          target: "/home/ec2-user/app/"
 
       - name: Restart Service via SSH
         uses: appleboy/ssh-action@v1.0.3
