@@ -28,6 +28,6 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
-tasks.named('jar') {
+tasks.named("jar") {
     enabled = false
 }
