@@ -1,0 +1,10 @@
+Soldier
+Serviceman
+Officer
+General
+Commander
+Admiral
+Captain
+Lieutenant
+Sergeant
+Private
