@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class GameWorld {
@@ -59,6 +60,22 @@ public class GameWorld {
         }
 
         return status;
+    }
+
+    private final AtomicLong currentTick = new AtomicLong(0);
+
+    // Call this inside your @Scheduled 20Hz tick method
+    public long incrementAndGetTick() {
+        return currentTick.incrementAndGet();
+    }
+
+    public long getCurrentTick() {
+        return currentTick.get();
+    }
+
+    // Call this when all players disconnect
+    public void resetTick() {
+        currentTick.set(0);
     }
 
 }

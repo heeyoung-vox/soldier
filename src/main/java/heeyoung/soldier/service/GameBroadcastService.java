@@ -35,10 +35,15 @@ public class GameBroadcastService {
                 .map(p -> new heeyoung.soldier.dto.PlayerDto(p.getId(), p.getName(), p.getX(), p.getY(),
                         p.getPlayerInput().getAngle()))
                 .toList();
+        if (players.size() == 0) {
+            gameWorld.resetTick();
+            return;
+        }
 
         Map<String, Object> messagePayload = new HashMap<>();
         messagePayload.put("type", "WORLD_STATE");
         messagePayload.put("players", players);
+        messagePayload.put("tick", gameWorld.incrementAndGetTick());
         String broadcastPayload = mapper.writeValueAsString(messagePayload);
         for (WebSocketSession session : GameWebSocketHandler.getSessions()) {
             if (session.isOpen()) {
