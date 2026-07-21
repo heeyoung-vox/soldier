@@ -50,6 +50,9 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
                         case "MOVE":
                             handleMoveMessage(session, root);
                             break;
+                        case "ROTATE":
+                            handleRotateMessage(session, root);
+                            break;
                         default:
                             System.out.println("Unknown message type: " + messageType);
                             break;
@@ -74,6 +77,15 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         PlayerInput input = player.getPlayerInput();
         input.setDx(root.get("dx").asDouble());
         input.setDy(root.get("dy").asDouble());
+
+    }
+
+    private void handleRotateMessage(WebSocketSession session, JsonNode root) {
+        Player player = gameWorld.getPlayer(session.getId());
+        if (player == null) {
+            return;
+        }
+        PlayerInput input = player.getPlayerInput();
         input.setAngle(root.get("angle").asDouble());
 
     }
