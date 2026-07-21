@@ -1,6 +1,8 @@
 package heeyoung.soldier.service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,11 +35,15 @@ public class GameBroadcastService {
                 .map(p -> new heeyoung.soldier.dto.PlayerDto(p.getId(), p.getName(), p.getX(), p.getY(),
                         p.getPlayerInput().getAngle()))
                 .toList();
-        String playerList = mapper.writeValueAsString(players);
+
+        Map<String, Object> messagePayload = new HashMap<>();
+        messagePayload.put("type", "WORLD_STATE");
+        messagePayload.put("players", players);
+        String broadcastPayload = mapper.writeValueAsString(messagePayload);
         for (WebSocketSession session : GameWebSocketHandler.getSessions()) {
             if (session.isOpen()) {
                 try {
-                    session.sendMessage(new TextMessage(playerList));
+                    session.sendMessage(new TextMessage(broadcastPayload));
 
                 } catch (IOException e) {
                     session.close();
