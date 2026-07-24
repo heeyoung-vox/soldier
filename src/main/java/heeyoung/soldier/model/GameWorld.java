@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class GameWorld {
-    public static final double MAP_WIDTH = 1000.0;
-    public static final double MAP_HEIGHT = 1000.0;
+    public static final double MAP_WIDTH = 2000.0;
+    public static final double MAP_HEIGHT = 2000.0;
     public static final double MIN_SPAWN_DISTANCE = 50.0;
 
     private Map<String, Player> players = new ConcurrentHashMap<>();

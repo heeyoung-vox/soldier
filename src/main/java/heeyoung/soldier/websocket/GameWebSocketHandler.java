@@ -112,7 +112,8 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
             Map<String, String> welcomeMessage = new HashMap<>();
             welcomeMessage.put("type", "WELCOME");
             welcomeMessage.put("id", newPlayer.getId());
-
+            welcomeMessage.put("map-width", String.valueOf(gameWorld.MAP_WIDTH));
+            welcomeMessage.put("map-height", String.valueOf(gameWorld.MAP_HEIGHT));
             String jsonMessage = mapper.writeValueAsString(welcomeMessage);
             session.sendMessage(new TextMessage(jsonMessage));
         } catch (IOException e) {
