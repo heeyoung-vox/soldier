@@ -120,21 +120,34 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         // starting stat for player
         newPlayer.updatePlayerStat(new PlayerStat(100, 100, 10));
 
-        gameWorld.addPlayer(newPlayer);
-        WebSocketSession decoratedSession = new ConcurrentWebSocketSessionDecorator(session, 10000, 512 * 1024);
-        sessions.add(decoratedSession);
+        boolean isSucceeded = gameWorld.addPlayer(newPlayer);
+        if (isSucceeded) {
 
-        // one time welcome packet
-        try {
-            Map<String, String> welcomeMessage = new HashMap<>();
-            welcomeMessage.put("type", "WELCOME");
-            welcomeMessage.put("id", newPlayer.getId());
-            welcomeMessage.put("map-width", String.valueOf(gameWorld.MAP_WIDTH));
-            welcomeMessage.put("map-height", String.valueOf(gameWorld.MAP_HEIGHT));
-            String jsonMessage = mapper.writeValueAsString(welcomeMessage);
-            decoratedSession.sendMessage(new TextMessage(jsonMessage));
-        } catch (IOException e) {
-            System.out.println("Failed to send unique welcome packet: " + e.getMessage());
+            WebSocketSession decoratedSession = new ConcurrentWebSocketSessionDecorator(session, 10000, 512 * 1024);
+            sessions.add(decoratedSession);
+
+            // one time welcome packet
+            try {
+                Map<String, String> welcomeMessage = new HashMap<>();
+                welcomeMessage.put("type", "WELCOME");
+                welcomeMessage.put("id", newPlayer.getId());
+                welcomeMessage.put("map-width", String.valueOf(gameWorld.MAP_WIDTH));
+                welcomeMessage.put("map-height", String.valueOf(gameWorld.MAP_HEIGHT));
+                String jsonMessage = mapper.writeValueAsString(welcomeMessage);
+                decoratedSession.sendMessage(new TextMessage(jsonMessage));
+            } catch (IOException e) {
+                System.out.println("Failed to send unique welcome packet: " + e.getMessage());
+            }
+        } else {
+            try {
+                Map<String, String> errorMessage = new HashMap<>();
+                errorMessage.put("type", "DENIED");
+                errorMessage.put("message", "Server is full");
+                String jsonMessage = mapper.writeValueAsString(errorMessage);
+                session.sendMessage(new TextMessage(jsonMessage));
+            } catch (IOException e) {
+                System.out.println("Failed to send error packet: " + e.getMessage());
+            }
         }
     }
 

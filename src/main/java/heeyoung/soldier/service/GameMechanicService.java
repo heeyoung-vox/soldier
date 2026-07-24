@@ -15,7 +15,7 @@ public class GameMechanicService {
     private final AtomicLong bulletIdCounter = new AtomicLong(0);
     private final AtomicLong scoreIdCounter = new AtomicLong(0);
 
-    private final double BULLET_SPEED = 1;
+    private final double BULLET_SPEED = 15;
     private final int BULLET_REMAINING_TIME = 30; // tick
 
     public GameMechanicService(GameWorld gameWorld) {

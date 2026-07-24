@@ -16,6 +16,7 @@ public class GameWorld {
     public static final double MAP_WIDTH = 2000.0;
     public static final double MAP_HEIGHT = 2000.0;
     public static final double MIN_SPAWN_DISTANCE = 50.0;
+    public static final int MAX_PLAYERS = 10;
 
     private final Map<String, Player> players = new ConcurrentHashMap<>();
     private final Map<String, Bullet> bullets = new ConcurrentHashMap<>();
@@ -27,8 +28,11 @@ public class GameWorld {
         return activeNames.add(name.toLowerCase());
     }
 
-    public void addPlayer(Player player) {
+    public boolean addPlayer(Player player) {
+
         synchronized (spawnLock) {
+            if (players.size() >= MAX_PLAYERS)
+                return false;
             double x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
             double y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
 
@@ -39,6 +43,7 @@ public class GameWorld {
 
             player.setPosition(x, y);
             players.put(player.getId(), player);
+            return true;
         }
     }
 
