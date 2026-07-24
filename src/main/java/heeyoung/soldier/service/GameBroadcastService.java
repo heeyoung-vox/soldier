@@ -29,11 +29,14 @@ public class GameBroadcastService {
     @Scheduled(fixedRate = 50)
     public void BroadcastMessage() throws Exception {
         // Run physics simulation for all players before broadcasting
-        gameWorld.getAllPlayers().values().forEach(physicsSimulationService::simulate);
+        physicsSimulationService.simulate();
 
         var players = gameWorld.getAllPlayers().values().stream()
                 .map(p -> new heeyoung.soldier.dto.PlayerDto(p.getId(), p.getName(), p.getX(), p.getY(),
                         p.getPlayerInput().getAngle()))
+                .toList();
+        var bullets = gameWorld.getAllBullets().values().stream()
+                .map(b -> new heeyoung.soldier.dto.BulletDto(b.getId(), b.getX(), b.getY()))
                 .toList();
         if (players.size() == 0) {
             gameWorld.resetTick();
@@ -43,6 +46,7 @@ public class GameBroadcastService {
         Map<String, Object> messagePayload = new HashMap<>();
         messagePayload.put("type", "WORLD_STATE");
         messagePayload.put("players", players);
+        messagePayload.put("bullets", bullets);
         messagePayload.put("tick", gameWorld.incrementAndGetTick());
         String broadcastPayload = mapper.writeValueAsString(messagePayload);
         for (WebSocketSession session : GameWebSocketHandler.getSessions()) {

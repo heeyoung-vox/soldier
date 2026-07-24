@@ -14,12 +14,14 @@ public class GameWorld {
     public static final double MIN_SPAWN_DISTANCE = 50.0;
 
     private Map<String, Player> players = new ConcurrentHashMap<>();
+    private Map<String, Bullet> bullets = new ConcurrentHashMap<>();
+    private Map<String, Score> scores = new ConcurrentHashMap<>();
 
     public void addPlayer(Player player) {
         double x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
         double y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
 
-        while (!checkValidPos(x, y)) {
+        while (!checkValidPlayerPos(x, y)) {
             x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
             y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
         }
@@ -30,19 +32,51 @@ public class GameWorld {
         players.put(player.getId(), player);
     }
 
+    public void addBullet(Bullet bullet) {
+        bullets.put(bullet.getId(), bullet);
+    }
+
+    public void addScore(Score score) {
+        scores.put(score.getId(), score);
+    }
+
     public void removePlayer(String id) {
         players.remove(id);
+    }
+
+    public void removeBullet(String id) {
+        bullets.remove(id);
+    }
+
+    public void removeScore(String id) {
+        scores.remove(id);
     }
 
     public Player getPlayer(String id) {
         return players.get(id);
     }
 
+    public Bullet getBullet(String id) {
+        return bullets.get(id);
+    }
+
+    public Score getScore(String id) {
+        return scores.get(id);
+    }
+
     public Map<String, Player> getAllPlayers() {
         return players;
     }
 
-    private boolean checkValidPos(double x, double y) {
+    public Map<String, Bullet> getAllBullets() {
+        return bullets;
+    }
+
+    public Map<String, Score> getAllScores() {
+        return scores;
+    }
+
+    private boolean checkValidPlayerPos(double x, double y) {
         boolean status = true;
         for (Map.Entry<String, Player> entry : players.entrySet()) {
             double ex = entry.getValue().getX();

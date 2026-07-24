@@ -2,14 +2,32 @@ package heeyoung.soldier.service;
 
 import org.springframework.stereotype.Service;
 
+import heeyoung.soldier.model.Bullet;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 
 @Service
 public class PhysicsSimulationService {
     final static double PLAYER_SPEED = 10.0f;
+    GameWorld gameWorld;
 
-    public void simulate(Player player) {
+    PhysicsSimulationService(GameWorld gameWorld) {
+        this.gameWorld = gameWorld;
+    }
+
+    public void simulate() {
+        gameWorld.getAllPlayers().values().forEach(this::simulatePlayer);
+        gameWorld.getAllBullets().values().forEach(this::simulateBullet);
+    }
+
+    private void simulateBullet(Bullet bullet) {
+        bullet.update();
+        if (!bullet.isAlive()) {
+            gameWorld.removeBullet(bullet.getId());
+        }
+    }
+
+    private void simulatePlayer(Player player) {
         double dx = player.getPlayerInput().getDx() * PLAYER_SPEED;
         double dy = player.getPlayerInput().getDy() * PLAYER_SPEED;
 

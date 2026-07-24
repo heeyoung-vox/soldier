@@ -5,7 +5,10 @@ public class Player {
     private String name;
     private double x, y;
 
+    private long lastShotTime = -1;
+
     private PlayerInput playerInput = new PlayerInput();
+    private PlayerStat stat = new PlayerStat();
 
     public String getId() {
         return id;
@@ -41,6 +44,18 @@ public class Player {
 
     public PlayerInput getPlayerInput() {
         return playerInput;
+    }
+
+    public PlayerStat getPlayerStat() {
+        return stat;
+    }
+
+    public long getLastShotTime() {
+        return this.lastShotTime;
+    }
+
+    public void setLastShotTime(long lastShotTime) {
+        this.lastShotTime = lastShotTime;
     }
 
 }

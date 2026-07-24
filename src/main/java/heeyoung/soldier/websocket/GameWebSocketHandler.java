@@ -21,6 +21,7 @@ import tools.jackson.databind.ObjectMapper;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 import heeyoung.soldier.model.PlayerInput;
+import heeyoung.soldier.service.GameMechanicService;
 import heeyoung.soldier.service.NameGeneratorService;
 
 @Component
@@ -28,12 +29,17 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
 
     GameWorld gameWorld;
     NameGeneratorService nameGenerator;
+    GameMechanicService gameMechanicService;
+
     ObjectMapper mapper = new ObjectMapper();
     private static final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
-    public GameWebSocketHandler(GameWorld gameWorld, NameGeneratorService nameGenerator) {
+    public GameWebSocketHandler(GameWorld gameWorld,
+            NameGeneratorService nameGenerator,
+            GameMechanicService gameMechanicService) {
         this.gameWorld = gameWorld;
         this.nameGenerator = nameGenerator;
+        this.gameMechanicService = gameMechanicService;
     }
 
     @Override
@@ -53,6 +59,9 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
                         case "ROTATE":
                             handleRotateMessage(session, root);
                             break;
+                        case "SHOOT":
+                            handleShootMessage(session, root);
+                            break;
                         default:
                             System.out.println("Unknown message type: " + messageType);
                             break;
@@ -67,6 +76,15 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         } catch (Exception e) {
             System.out.println("General Error: " + e.getMessage());
         }
+    }
+
+    private void handleShootMessage(WebSocketSession session, JsonNode root) {
+        Player player = gameWorld.getPlayer(session.getId());
+        if (player == null) {
+            return;
+        }
+        gameMechanicService.PlayerShoot(player);
+
     }
 
     private void handleMoveMessage(WebSocketSession session, JsonNode root) {
@@ -104,6 +122,12 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         Player newPlayer = new Player();
         newPlayer.setId(session.getId());
         newPlayer.setName(nameRef.get());
+
+        // starting stat for player
+        newPlayer.getPlayerStat().setMaxHealth(100);
+        newPlayer.getPlayerStat().setCurrentHealth(100);
+        newPlayer.getPlayerStat().setReloadTime(10);
+
         gameWorld.addPlayer(newPlayer);
         sessions.add(session);
 

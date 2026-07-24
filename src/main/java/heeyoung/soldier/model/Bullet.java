@@ -7,16 +7,17 @@ public class Bullet {
     private double y;
     private final double vx;
     private final double vy;
-    private double lifetime;
+    private int remainingTime;
 
-    public Bullet(String id, String ownerId, double x, double y, double vx, double vy, double lifetime) {
+    public Bullet(String id, String ownerId,
+            double x, double y, double vx, double vy, int remainingTime) {
         this.id = id;
         this.ownerId = ownerId;
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
-        this.lifetime = lifetime;
+        this.remainingTime = remainingTime;
     }
 
     public String getId() {
@@ -43,21 +44,21 @@ public class Bullet {
         return vy;
     }
 
-    public double getLifetime() {
-        return lifetime;
+    public int getremainingTime() {
+        return remainingTime;
     }
 
-    public void setLifetime(double lifetime) {
-        this.lifetime = lifetime;
+    public void setremainingTime(int remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
-    public void update(double deltaTime) {
-        x += vx * deltaTime;
-        y += vy * deltaTime;
-        lifetime -= deltaTime;
+    public void update() {
+        x += vx;
+        y += vy;
+        remainingTime -= 1;
     }
 
     public boolean isAlive() {
-        return lifetime > 0;
+        return remainingTime > 0;
     }
 }
