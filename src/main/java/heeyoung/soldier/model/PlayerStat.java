@@ -1,37 +1,40 @@
 package heeyoung.soldier.model;
 
-public class PlayerStat {
-    private double maxHealth;
-    private double currentHealth;
-    private long reloadTime;// in tick
+/**
+ * Immutable PlayerStat snapshot.
+ */
+public final class PlayerStat {
+    private final double maxHealth;
+    private final double currentHealth;
+    private final long reloadTime; // in ticks
 
-    public double getMaxHealth() {
-        return this.maxHealth;
+    public PlayerStat() {
+        this.maxHealth = 0.0;
+        this.currentHealth = 0.0;
+        this.reloadTime = 0;
     }
 
-    public void setMaxHealth(double maxHealth) {
+    public PlayerStat(double maxHealth, double currentHealth, long reloadTime) {
         this.maxHealth = maxHealth;
-    }
-
-    public double getCurrentHealth() {
-        return this.currentHealth;
-    }
-
-    public void setCurrentHealth(double currentHealth) {
         if (currentHealth < 0) {
             this.currentHealth = 0;
-        } else if (currentHealth > this.maxHealth) {
-            this.currentHealth = this.maxHealth;
+        } else if (currentHealth > maxHealth) {
+            this.currentHealth = maxHealth;
         } else {
             this.currentHealth = currentHealth;
         }
+        this.reloadTime = reloadTime;
+    }
+
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+
+    public double getCurrentHealth() {
+        return currentHealth;
     }
 
     public long getReloadTime() {
-        return this.reloadTime;
-    }
-
-    public void setReloadTime(long reloadTime) {
-        this.reloadTime = reloadTime;
+        return reloadTime;
     }
 }

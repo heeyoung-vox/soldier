@@ -12,6 +12,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.exc.StreamReadException;
@@ -21,6 +22,7 @@ import tools.jackson.databind.ObjectMapper;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 import heeyoung.soldier.model.PlayerInput;
+import heeyoung.soldier.model.PlayerStat;
 import heeyoung.soldier.service.GameMechanicService;
 import heeyoung.soldier.service.NameGeneratorService;
 
@@ -92,10 +94,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         if (player == null) {
             return;
         }
-        PlayerInput input = player.getPlayerInput();
-        input.setDx(root.get("dx").asDouble());
-        input.setDy(root.get("dy").asDouble());
-
+        player.updateMoveInput(root.get("dx").asDouble(), root.get("dy").asDouble());
     }
 
     private void handleRotateMessage(WebSocketSession session, JsonNode root) {
@@ -103,9 +102,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         if (player == null) {
             return;
         }
-        PlayerInput input = player.getPlayerInput();
-        input.setAngle(root.get("angle").asDouble());
-
+        player.updateRotateInput(root.get("angle").asDouble());
     }
 
     private void handleJoinMessage(WebSocketSession session, JsonNode root) {
@@ -113,23 +110,19 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
             return;
         }
 
-        AtomicReference<String> nameRef = new AtomicReference<>();
+        String name;
         do {
-            nameRef.set(nameGenerator.generateRandomName());
-        } while (gameWorld.getAllPlayers().values().stream()
-                .anyMatch(p -> p.getName().equalsIgnoreCase(nameRef.get())));
+            name = nameGenerator.generateRandomName();
+        } while (!gameWorld.claimName(name));
 
-        Player newPlayer = new Player();
-        newPlayer.setId(session.getId());
-        newPlayer.setName(nameRef.get());
+        Player newPlayer = new Player(session.getId(), name);
 
         // starting stat for player
-        newPlayer.getPlayerStat().setMaxHealth(100);
-        newPlayer.getPlayerStat().setCurrentHealth(100);
-        newPlayer.getPlayerStat().setReloadTime(10);
+        newPlayer.updatePlayerStat(new PlayerStat(100, 100, 10));
 
         gameWorld.addPlayer(newPlayer);
-        sessions.add(session);
+        WebSocketSession decoratedSession = new ConcurrentWebSocketSessionDecorator(session, 10000, 512 * 1024);
+        sessions.add(decoratedSession);
 
         // one time welcome packet
         try {
@@ -139,7 +132,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
             welcomeMessage.put("map-width", String.valueOf(gameWorld.MAP_WIDTH));
             welcomeMessage.put("map-height", String.valueOf(gameWorld.MAP_HEIGHT));
             String jsonMessage = mapper.writeValueAsString(welcomeMessage);
-            session.sendMessage(new TextMessage(jsonMessage));
+            decoratedSession.sendMessage(new TextMessage(jsonMessage));
         } catch (IOException e) {
             System.out.println("Failed to send unique welcome packet: " + e.getMessage());
         }
@@ -148,7 +141,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         gameWorld.removePlayer(session.getId());
-        sessions.remove(session);
+        sessions.removeIf(s -> s.getId().equals(session.getId()));
     }
 
     public static List<WebSocketSession> getSessions() {

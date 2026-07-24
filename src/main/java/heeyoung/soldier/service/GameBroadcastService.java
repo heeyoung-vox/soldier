@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import heeyoung.soldier.model.GameWorld;
+import heeyoung.soldier.model.Player;
 import heeyoung.soldier.websocket.GameWebSocketHandler;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.web.socket.TextMessage;
@@ -32,8 +33,12 @@ public class GameBroadcastService {
         physicsSimulationService.simulate();
 
         var players = gameWorld.getAllPlayers().values().stream()
-                .map(p -> new heeyoung.soldier.dto.PlayerDto(p.getId(), p.getName(), p.getX(), p.getY(),
-                        p.getPlayerInput().getAngle()))
+                .map(p -> {
+                    Player.Position pos = p.getPosition();
+                    return new heeyoung.soldier.dto.PlayerDto(
+                            p.getId(), p.getName(), pos.x, pos.y,
+                            p.getPlayerInput().getAngle());
+                })
                 .toList();
         var bullets = gameWorld.getAllBullets().values().stream()
                 .map(b -> new heeyoung.soldier.dto.BulletDto(b.getId(), b.getX(), b.getY()))
@@ -56,7 +61,7 @@ public class GameBroadcastService {
 
                 } catch (IOException e) {
                     session.close();
-                    GameWebSocketHandler.getSessions().remove(session);
+                    GameWebSocketHandler.getSessions().removeIf(s -> s.getId().equals(session.getId()));
                 }
             }
         }

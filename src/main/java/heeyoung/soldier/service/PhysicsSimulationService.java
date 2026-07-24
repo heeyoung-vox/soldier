@@ -21,9 +21,19 @@ public class PhysicsSimulationService {
     }
 
     private void simulateBullet(Bullet bullet) {
-        bullet.update();
-        if (!bullet.isAlive()) {
+        int nextRemainingTime = bullet.getRemainingTime() - 1;
+        if (nextRemainingTime <= 0) {
             gameWorld.removeBullet(bullet.getId());
+        } else {
+            Bullet updatedBullet = new Bullet(
+                    bullet.getId(),
+                    bullet.getOwnerId(),
+                    bullet.getX() + bullet.getVx(),
+                    bullet.getY() + bullet.getVy(),
+                    bullet.getVx(),
+                    bullet.getVy(),
+                    nextRemainingTime);
+            gameWorld.addBullet(updatedBullet);
         }
     }
 
@@ -31,19 +41,24 @@ public class PhysicsSimulationService {
         double dx = player.getPlayerInput().getDx() * PLAYER_SPEED;
         double dy = player.getPlayerInput().getDy() * PLAYER_SPEED;
 
-        // check border
-        if (player.getX() + dx < GameWorld.MAP_WIDTH && player.getX() + dx > 0)
-            player.setX(player.getX() + dx);
-        else if (player.getX() + dx >= GameWorld.MAP_WIDTH)
-            player.setX(GameWorld.MAP_WIDTH);
-        else if (player.getX() + dx <= 0)
-            player.setX(0);
+        Player.Position pos = player.getPosition();
+        double new_x, new_y;
 
-        if (player.getY() + dy < GameWorld.MAP_HEIGHT && player.getY() + dy > 0)
-            player.setY(player.getY() + dy);
-        else if (player.getY() + dy >= GameWorld.MAP_HEIGHT)
-            player.setY(GameWorld.MAP_HEIGHT);
-        else if (player.getY() + dy <= 0)
-            player.setY(0);
+        // check border
+        if (pos.x + dx < GameWorld.MAP_WIDTH && pos.x + dx > 0)
+            new_x = pos.x + dx;
+        else if (pos.x + dx >= GameWorld.MAP_WIDTH)
+            new_x = GameWorld.MAP_WIDTH;
+        else
+            new_x = 0;
+
+        if (pos.y + dy < GameWorld.MAP_HEIGHT && pos.y + dy > 0)
+            new_y = pos.y + dy;
+        else if (pos.y + dy >= GameWorld.MAP_HEIGHT)
+            new_y = GameWorld.MAP_HEIGHT;
+        else
+            new_y = 0;
+
+        player.setPosition(new_x, new_y);
     }
 }

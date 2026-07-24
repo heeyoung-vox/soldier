@@ -1,36 +1,34 @@
 package heeyoung.soldier.model;
 
-public class PlayerInput {
-    private double dx, dy, angle;
+/**
+ * Immutable PlayerInput snapshot.
+ */
+public final class PlayerInput {
+    private final double dx;
+    private final double dy;
+    private final double angle;
 
     public PlayerInput() {
-        dx = 0f;
-        dy = 0f;
-        angle = 0f;
+        this.dx = 0.0;
+        this.dy = 0.0;
+        this.angle = 0.0;
+    }
+
+    public PlayerInput(double dx, double dy, double angle) {
+        this.dx = dx;
+        this.dy = dy;
+        this.angle = angle;
     }
 
     public double getDx() {
         return dx;
     }
 
-    public void setDx(double dx) {
-        this.dx = dx;
-    }
-
     public double getDy() {
         return dy;
-    }
-
-    public void setDy(double dy) {
-        this.dy = dy;
     }
 
     public double getAngle() {
         return angle;
     }
-
-    public void setAngle(double angle) {
-        this.angle = angle;
-    }
-
 }

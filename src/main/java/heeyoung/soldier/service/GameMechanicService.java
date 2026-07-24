@@ -24,20 +24,19 @@ public class GameMechanicService {
 
     public void PlayerShoot(Player player) {
 
-        if (player.getPlayerStat().getReloadTime() <= gameWorld.getCurrentTick() - player.getLastShotTime()
-                || player.getLastShotTime() == -1) {
-            player.setLastShotTime(gameWorld.getCurrentTick());
+        if (player.tryShoot(gameWorld.getCurrentTick(), player.getPlayerStat().getReloadTime())) {
             double[] velocity = Utility.angleToVector(player.getPlayerInput().getAngle());
+            Player.Position pos = player.getPosition();
             Bullet bullet = new Bullet(
                     Long.toString(bulletIdCounter.getAndIncrement()),
                     player.getId(),
-                    player.getX(),
-                    player.getY(),
+                    pos.x,
+                    pos.y,
                     velocity[0] * BULLET_SPEED,
                     velocity[1] * BULLET_SPEED,
                     BULLET_REMAINING_TIME);
             gameWorld.addBullet(bullet);
         }
-        System.out.println("bullet number: " + gameWorld.getAllBullets().size());
+
     }
 }

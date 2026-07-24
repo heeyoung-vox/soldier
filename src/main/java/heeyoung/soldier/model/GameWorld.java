@@ -1,9 +1,13 @@
 package heeyoung.soldier.model;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
+
+import heeyoung.soldier.model.Player.Position;
+
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -13,23 +17,29 @@ public class GameWorld {
     public static final double MAP_HEIGHT = 2000.0;
     public static final double MIN_SPAWN_DISTANCE = 50.0;
 
-    private Map<String, Player> players = new ConcurrentHashMap<>();
-    private Map<String, Bullet> bullets = new ConcurrentHashMap<>();
-    private Map<String, Score> scores = new ConcurrentHashMap<>();
+    private final Map<String, Player> players = new ConcurrentHashMap<>();
+    private final Map<String, Bullet> bullets = new ConcurrentHashMap<>();
+    private final Map<String, Score> scores = new ConcurrentHashMap<>();
+    private final Set<String> activeNames = ConcurrentHashMap.newKeySet();
+    private final Object spawnLock = new Object();
+
+    public boolean claimName(String name) {
+        return activeNames.add(name.toLowerCase());
+    }
 
     public void addPlayer(Player player) {
-        double x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
-        double y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
+        synchronized (spawnLock) {
+            double x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
+            double y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
 
-        while (!checkValidPlayerPos(x, y)) {
-            x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
-            y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
+            while (!checkValidPlayerPos(x, y)) {
+                x = ThreadLocalRandom.current().nextDouble(MAP_WIDTH);
+                y = ThreadLocalRandom.current().nextDouble(MAP_HEIGHT);
+            }
+
+            player.setPosition(x, y);
+            players.put(player.getId(), player);
         }
-
-        player.setX(x);
-        player.setY(y);
-
-        players.put(player.getId(), player);
     }
 
     public void addBullet(Bullet bullet) {
@@ -41,7 +51,10 @@ public class GameWorld {
     }
 
     public void removePlayer(String id) {
-        players.remove(id);
+        Player player = players.remove(id);
+        if (player != null) {
+            activeNames.remove(player.getName().toLowerCase());
+        }
     }
 
     public void removeBullet(String id) {
@@ -79,8 +92,9 @@ public class GameWorld {
     private boolean checkValidPlayerPos(double x, double y) {
         boolean status = true;
         for (Map.Entry<String, Player> entry : players.entrySet()) {
-            double ex = entry.getValue().getX();
-            double ey = entry.getValue().getY();
+            Position position = entry.getValue().getPosition();
+            double ex = position.x;
+            double ey = position.y;
 
             double dx = ex - x;
             double dy = ey - y;

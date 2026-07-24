@@ -1,13 +1,16 @@
 package heeyoung.soldier.model;
 
-public class Bullet {
+/**
+ * Immutable Bullet value object.
+ */
+public final class Bullet {
     private final String id;
     private final String ownerId;
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
     private final double vx;
     private final double vy;
-    private int remainingTime;
+    private final int remainingTime;
 
     public Bullet(String id, String ownerId,
             double x, double y, double vx, double vy, int remainingTime) {
@@ -44,21 +47,7 @@ public class Bullet {
         return vy;
     }
 
-    public int getremainingTime() {
+    public int getRemainingTime() {
         return remainingTime;
-    }
-
-    public void setremainingTime(int remainingTime) {
-        this.remainingTime = remainingTime;
-    }
-
-    public void update() {
-        x += vx;
-        y += vy;
-        remainingTime -= 1;
-    }
-
-    public boolean isAlive() {
-        return remainingTime > 0;
     }
 }
