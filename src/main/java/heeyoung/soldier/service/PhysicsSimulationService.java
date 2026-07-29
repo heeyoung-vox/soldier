@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import heeyoung.soldier.model.Bullet;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
+import heeyoung.soldier.model.Position;
 
 @Service
 public class PhysicsSimulationService {
@@ -25,15 +26,13 @@ public class PhysicsSimulationService {
         if (nextRemainingTime <= 0) {
             gameWorld.removeBullet(bullet.getId());
         } else {
-            Bullet updatedBullet = new Bullet(
-                    bullet.getId(),
-                    bullet.getOwnerId(),
+            bullet.updateStat(new Bullet.BulletStat(
                     bullet.getX() + bullet.getVx(),
                     bullet.getY() + bullet.getVy(),
                     bullet.getVx(),
                     bullet.getVy(),
-                    nextRemainingTime);
-            gameWorld.addBullet(updatedBullet);
+                    nextRemainingTime,
+                    bullet.getDamage()));
         }
     }
 
@@ -41,20 +40,20 @@ public class PhysicsSimulationService {
         double dx = player.getPlayerInput().getDx() * PLAYER_SPEED;
         double dy = player.getPlayerInput().getDy() * PLAYER_SPEED;
 
-        Player.Position pos = player.getPosition();
+        Position pos = player.getPosition();
         double new_x, new_y;
 
         // check border
-        if (pos.x + dx < GameWorld.MAP_WIDTH && pos.x + dx > 0)
-            new_x = pos.x + dx;
-        else if (pos.x + dx >= GameWorld.MAP_WIDTH)
+        if (pos.x() + dx < GameWorld.MAP_WIDTH && pos.x() + dx > 0)
+            new_x = pos.x() + dx;
+        else if (pos.x() + dx >= GameWorld.MAP_WIDTH)
             new_x = GameWorld.MAP_WIDTH;
         else
             new_x = 0;
 
-        if (pos.y + dy < GameWorld.MAP_HEIGHT && pos.y + dy > 0)
-            new_y = pos.y + dy;
-        else if (pos.y + dy >= GameWorld.MAP_HEIGHT)
+        if (pos.y() + dy < GameWorld.MAP_HEIGHT && pos.y() + dy > 0)
+            new_y = pos.y() + dy;
+        else if (pos.y() + dy >= GameWorld.MAP_HEIGHT)
             new_y = GameWorld.MAP_HEIGHT;
         else
             new_y = 0;

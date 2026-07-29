@@ -9,8 +9,8 @@ public final class PlayerStat {
     private final long reloadTime; // in ticks
 
     public PlayerStat() {
-        this.maxHealth = 0.0;
-        this.currentHealth = 0.0;
+        this.maxHealth = 100.0;
+        this.currentHealth = 100.0;
         this.reloadTime = 0;
     }
 
@@ -37,4 +37,5 @@ public final class PlayerStat {
     public long getReloadTime() {
         return reloadTime;
     }
+
 }

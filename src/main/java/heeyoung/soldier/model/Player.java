@@ -1,33 +1,25 @@
 package heeyoung.soldier.model;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Thread-safe Player.
- *
- * Design:
- * - id / name are set once at creation and never mutated afterward -> plain
- * finals, no sync needed.
- * - Position (x, y) is stored as a single immutable Position snapshot behind an
- * AtomicReference,
- * so readers never see a torn combination of old-x/new-y.
- * - lastShotTime uses AtomicLong with compareAndSet so the "can I shoot?"
- * check-then-update
- * is a single atomic step (no double-fire race).
- * - playerInput / stat still need the same treatment internally if their fields
- * are mutated
- * from multiple threads (see note at the bottom).
- */
-public class Player {
+import heeyoung.soldier.service.Collision.*;
+
+public class Player implements Collidable {
 
     // --- Identity: set once, never changes after construction ---
     private final String id;
     private final String name;
 
+    private final List<BoundingCircle> circles;
+
     public Player(String id, String name) {
         this.id = id;
         this.name = name;
+
+        this.circles = List.of(
+                new BoundingCircle(0f, 0f, 25.0f));
     }
 
     public String getId() {
@@ -38,18 +30,9 @@ public class Player {
         return name;
     }
 
-    public static final class Position {
-        public final double x;
-        public final double y;
-
-        public Position(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
     private final AtomicReference<Position> position = new AtomicReference<>(new Position(0, 0));
 
+    @Override
     public Position getPosition() {
         return position.get(); // consistent (x, y) pair, no torn reads
     }
@@ -102,6 +85,24 @@ public class Player {
     }
 
     public void updatePlayerStat(PlayerStat newStat) {
-        stat.set(newStat);
+        PlayerStat current = stat.get();
+        while (!stat.compareAndSet(current, newStat)) {
+            current = stat.get();
+        }
+    }
+
+    @Override
+    public Type getType() {
+        return Type.PLAYER;
+    }
+
+    @Override
+    public double getAngle() {
+        return playerInput.get().getAngle();
+    }
+
+    @Override
+    public List<BoundingCircle> getBoundingCircles() {
+        return circles;
     }
 }

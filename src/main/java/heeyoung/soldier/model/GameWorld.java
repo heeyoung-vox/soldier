@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
-import heeyoung.soldier.model.Player.Position;
-
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -98,8 +96,8 @@ public class GameWorld {
         boolean status = true;
         for (Map.Entry<String, Player> entry : players.entrySet()) {
             Position position = entry.getValue().getPosition();
-            double ex = position.x;
-            double ey = position.y;
+            double ex = position.x();
+            double ey = position.y();
 
             double dx = ex - x;
             double dy = ey - y;

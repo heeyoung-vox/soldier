@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import heeyoung.soldier.model.Bullet;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
+import heeyoung.soldier.model.Position;
 import heeyoung.soldier.helper.*;
 
 @Service
@@ -26,15 +27,16 @@ public class GameMechanicService {
 
         if (player.tryShoot(gameWorld.getCurrentTick(), player.getPlayerStat().getReloadTime())) {
             double[] velocity = Utility.angleToVector(player.getPlayerInput().getAngle());
-            Player.Position pos = player.getPosition();
+            Position pos = player.getPosition();
             Bullet bullet = new Bullet(
                     Long.toString(bulletIdCounter.getAndIncrement()),
                     player.getId(),
-                    pos.x,
-                    pos.y,
+                    pos.x(),
+                    pos.y(),
                     velocity[0] * BULLET_SPEED,
                     velocity[1] * BULLET_SPEED,
-                    BULLET_REMAINING_TIME);
+                    BULLET_REMAINING_TIME,
+                    10);
             gameWorld.addBullet(bullet);
         }
 

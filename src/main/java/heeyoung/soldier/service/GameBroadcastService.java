@@ -10,6 +10,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
+import heeyoung.soldier.model.PlayerStat;
+import heeyoung.soldier.model.Position;
 import heeyoung.soldier.websocket.GameWebSocketHandler;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.web.socket.TextMessage;
@@ -34,10 +36,13 @@ public class GameBroadcastService {
 
         var players = gameWorld.getAllPlayers().values().stream()
                 .map(p -> {
-                    Player.Position pos = p.getPosition();
+                    Position pos = p.getPosition();
+                    PlayerStat stat = p.getPlayerStat();
                     return new heeyoung.soldier.dto.PlayerDto(
-                            p.getId(), p.getName(), pos.x, pos.y,
-                            p.getPlayerInput().getAngle());
+                            p.getId(), p.getName(), pos.x(), pos.y(),
+                            p.getPlayerInput().getAngle(),
+                            stat.getMaxHealth(),
+                            stat.getCurrentHealth());
                 })
                 .toList();
         var bullets = gameWorld.getAllBullets().values().stream()
