@@ -54,9 +54,11 @@ public class GameWorld {
     }
 
     public void removePlayer(String id) {
-        Player player = players.remove(id);
-        if (player != null) {
-            activeNames.remove(player.getName().toLowerCase());
+        synchronized (spawnLock) {
+            Player player = players.remove(id);
+            if (player != null) {
+                activeNames.remove(player.getName().toLowerCase());
+            }
         }
     }
 
