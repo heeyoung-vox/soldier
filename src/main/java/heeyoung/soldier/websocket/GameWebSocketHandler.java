@@ -85,7 +85,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         if (player == null) {
             return;
         }
-        gameMechanicService.PlayerShoot(player);
+        player.updateShootInput(true);
 
     }
 

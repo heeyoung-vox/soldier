@@ -68,14 +68,23 @@ public class Player implements Collidable {
 
     public void updateMoveInput(double dx, double dy) {
         PlayerInput current = playerInput.get();
-        while (!playerInput.compareAndSet(current, new PlayerInput(dx, dy, current.getAngle()))) {
+        while (!playerInput.compareAndSet(current, new PlayerInput(dx, dy, current.getAngle(), current.isShooting()))) {
             current = playerInput.get();
         }
     }
 
     public void updateRotateInput(double angle) {
         PlayerInput current = playerInput.get();
-        while (!playerInput.compareAndSet(current, new PlayerInput(current.getDx(), current.getDy(), angle))) {
+        while (!playerInput.compareAndSet(current,
+                new PlayerInput(current.getDx(), current.getDy(), angle, current.isShooting()))) {
+            current = playerInput.get();
+        }
+    }
+
+    public void updateShootInput(boolean isShooting) {
+        PlayerInput current = playerInput.get();
+        while (!playerInput.compareAndSet(current,
+                new PlayerInput(current.getDx(), current.getDy(), current.getAngle(), isShooting))) {
             current = playerInput.get();
         }
     }

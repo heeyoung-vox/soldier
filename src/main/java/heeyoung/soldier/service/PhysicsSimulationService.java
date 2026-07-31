@@ -13,14 +13,18 @@ public class PhysicsSimulationService {
     final static double PLAYER_SPEED = 10.0f;
     GameWorld gameWorld;
     CollisionService collisionService;
+    GameMechanicService gameMechanicService;
 
     PhysicsSimulationService(GameWorld gameWorld,
-            CollisionService collisionService) {
+            CollisionService collisionService,
+            GameMechanicService gameMechanicService) {
         this.gameWorld = gameWorld;
         this.collisionService = collisionService;
+        this.gameMechanicService = gameMechanicService;
     }
 
     public void simulate() {
+
         collisionService.processCollision();
         gameWorld.getAllPlayers().values().forEach(this::simulatePlayer);
         gameWorld.getAllBullets().values().forEach(this::simulateBullet);
@@ -64,5 +68,13 @@ public class PhysicsSimulationService {
             new_y = 0;
 
         player.setPosition(new_x, new_y);
+        simulatePlayerShooting(player);
+    }
+
+    private void simulatePlayerShooting(Player player) {
+        if (player.getPlayerInput().isShooting()) {
+            gameMechanicService.PlayerShoot(player);
+            player.updateShootInput(false);
+        }
     }
 }
