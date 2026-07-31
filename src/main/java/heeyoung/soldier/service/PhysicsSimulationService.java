@@ -6,17 +6,22 @@ import heeyoung.soldier.model.Bullet;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 import heeyoung.soldier.model.Position;
+import heeyoung.soldier.service.Collision.CollisionService;
 
 @Service
 public class PhysicsSimulationService {
     final static double PLAYER_SPEED = 10.0f;
     GameWorld gameWorld;
+    CollisionService collisionService;
 
-    PhysicsSimulationService(GameWorld gameWorld) {
+    PhysicsSimulationService(GameWorld gameWorld,
+            CollisionService collisionService) {
         this.gameWorld = gameWorld;
+        this.collisionService = collisionService;
     }
 
     public void simulate() {
+        collisionService.processCollision();
         gameWorld.getAllPlayers().values().forEach(this::simulatePlayer);
         gameWorld.getAllBullets().values().forEach(this::simulateBullet);
     }

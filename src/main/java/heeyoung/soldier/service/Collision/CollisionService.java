@@ -21,10 +21,10 @@ public class CollisionService {
         this.gameWorld = gameWorld;
     }
 
-    public void ProcessCollision() {
+    public void processCollision() {
         for (Player player : gameWorld.getAllPlayers().values()) {
             for (Bullet bullet : gameWorld.getAllBullets().values()) {
-                if (checkCollision(player, bullet)) {
+                if (checkCollision(player, bullet) && bullet.getOwnerId() != player.getId()) {
                     PlayerStat stat = player.getPlayerStat();
                     double maxHealth = stat.getMaxHealth();
                     double currentHealth = stat.getCurrentHealth();
