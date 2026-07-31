@@ -84,6 +84,10 @@ public class Player implements Collidable {
         return stat.get();
     }
 
+    public boolean isAlive() {
+        return stat.get().getCurrentHealth() > 0;
+    }
+
     public void updatePlayerStat(PlayerStat newStat) {
         PlayerStat current = stat.get();
         while (!stat.compareAndSet(current, newStat)) {
