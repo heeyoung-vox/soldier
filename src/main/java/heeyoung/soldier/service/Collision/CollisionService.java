@@ -22,14 +22,16 @@ public class CollisionService {
     }
 
     public void processCollision() {
+        // check player vs bullet
         for (Player player : gameWorld.getAllPlayers().values()) {
             for (Bullet bullet : gameWorld.getAllBullets().values()) {
-                if (checkCollision(player, bullet) && bullet.getOwnerId() != player.getId()) {
+                if (player.isAlive() && checkCollision(player, bullet) && !bullet.getOwnerId().equals(player.getId())) {
                     PlayerStat stat = player.getPlayerStat();
                     double maxHealth = stat.getMaxHealth();
                     double currentHealth = stat.getCurrentHealth();
                     double newHealth = Math.clamp(currentHealth - bullet.getDamage(), 0, maxHealth);
                     player.updatePlayerStat(new PlayerStat(maxHealth, newHealth, stat.getReloadTime()));
+                    gameWorld.removeBullet(bullet.getId());
                 }
             }
         }

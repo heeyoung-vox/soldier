@@ -24,28 +24,28 @@ public class PhysicsSimulationService {
     }
 
     public void simulate() {
-
         collisionService.processCollision();
         gameWorld.getAllPlayers().values().forEach(this::simulatePlayer);
         gameWorld.getAllBullets().values().forEach(this::simulateBullet);
+
     }
 
     private void simulateBullet(Bullet bullet) {
         int nextRemainingTime = bullet.getRemainingTime() - 1;
-        if (nextRemainingTime <= 0) {
-            gameWorld.removeBullet(bullet.getId());
-        } else {
-            bullet.updateStat(new Bullet.BulletStat(
-                    bullet.getX() + bullet.getVx(),
-                    bullet.getY() + bullet.getVy(),
-                    bullet.getVx(),
-                    bullet.getVy(),
-                    nextRemainingTime,
-                    bullet.getDamage()));
-        }
+        bullet.updateStat(new Bullet.BulletStat(
+                bullet.getX() + bullet.getVx(),
+                bullet.getY() + bullet.getVy(),
+                bullet.getVx(),
+                bullet.getVy(),
+                nextRemainingTime,
+                bullet.getDamage()));
     }
 
     private void simulatePlayer(Player player) {
+        if (!player.isAlive()) {
+            return;
+        }
+
         double dx = player.getPlayerInput().getDx() * PLAYER_SPEED;
         double dy = player.getPlayerInput().getDy() * PLAYER_SPEED;
 

@@ -2,10 +2,12 @@ package heeyoung.soldier.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import heeyoung.soldier.model.GameWorld;
@@ -14,7 +16,6 @@ import heeyoung.soldier.model.PlayerStat;
 import heeyoung.soldier.model.Position;
 import heeyoung.soldier.websocket.GameWebSocketHandler;
 import tools.jackson.databind.ObjectMapper;
-import org.springframework.web.socket.TextMessage;
 
 @Service
 public class GameBroadcastService {
@@ -27,12 +28,48 @@ public class GameBroadcastService {
         this.physicsSimulationService = physicsSimulationService;
     }
 
-    // Thread-safe collection to hold active player sessions
-
     @Scheduled(fixedRate = 50)
     public void BroadcastMessage() throws Exception {
         // Run physics simulation for all players before broadcasting
         physicsSimulationService.simulate();
+
+        // remove dead player and notify their session with a QUIT signal
+        List<Player> deadPlayers = gameWorld.getAllPlayers().values().stream()
+                .filter(p -> !p.isAlive())
+                .toList();
+
+        for (Player p : deadPlayers) {
+            gameWorld.removePlayer(p.getId());
+
+            Map<String, Object> quitPayload = new HashMap<>();
+            quitPayload.put("type", "QUIT");
+            quitPayload.put("reason", "DEAD");
+            String quitJson = mapper.writeValueAsString(quitPayload);
+
+            WebSocketSession deadSession = GameWebSocketHandler.getSessions().stream()
+                    .filter(s -> s.getId().equals(p.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (deadSession != null && deadSession.isOpen()) {
+                try {
+                    deadSession.sendMessage(new TextMessage(quitJson));
+                } catch (IOException e) {
+                    try {
+                        deadSession.close();
+                    } catch (IOException ignored) {
+                    }
+                    GameWebSocketHandler.getSessions().removeIf(s -> s.getId().equals(deadSession.getId()));
+                }
+            }
+        }
+
+        // remove expired bullet
+        gameWorld.getAllBullets().values().forEach(b -> {
+            if (b.getRemainingTime() <= 0) {
+                gameWorld.removeBullet(b.getId());
+            }
+        });
 
         var players = gameWorld.getAllPlayers().values().stream()
                 .map(p -> {
@@ -48,6 +85,7 @@ public class GameBroadcastService {
         var bullets = gameWorld.getAllBullets().values().stream()
                 .map(b -> new heeyoung.soldier.dto.BulletDto(b.getId(), b.getX(), b.getY()))
                 .toList();
+
         if (players.size() == 0) {
             gameWorld.resetTick();
             return;
@@ -60,12 +98,15 @@ public class GameBroadcastService {
         messagePayload.put("tick", gameWorld.incrementAndGetTick());
         String broadcastPayload = mapper.writeValueAsString(messagePayload);
         for (WebSocketSession session : GameWebSocketHandler.getSessions()) {
-            if (session.isOpen()) {
+            if (session.isOpen() && gameWorld.getPlayer(session.getId()) != null) {
                 try {
                     session.sendMessage(new TextMessage(broadcastPayload));
 
                 } catch (IOException e) {
-                    session.close();
+                    try {
+                        session.close();
+                    } catch (IOException ignored) {
+                    }
                     GameWebSocketHandler.getSessions().removeIf(s -> s.getId().equals(session.getId()));
                 }
             }

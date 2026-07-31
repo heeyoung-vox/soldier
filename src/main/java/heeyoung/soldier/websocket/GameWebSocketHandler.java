@@ -82,7 +82,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
 
     private void handleShootMessage(WebSocketSession session, JsonNode root) {
         Player player = gameWorld.getPlayer(session.getId());
-        if (player == null) {
+        if (player == null || !player.isAlive()) {
             return;
         }
         player.updateShootInput(true);
@@ -91,7 +91,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
 
     private void handleMoveMessage(WebSocketSession session, JsonNode root) {
         Player player = gameWorld.getPlayer(session.getId());
-        if (player == null) {
+        if (player == null || !player.isAlive()) {
             return;
         }
         player.updateMoveInput(root.get("dx").asDouble(), root.get("dy").asDouble());
@@ -99,7 +99,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
 
     private void handleRotateMessage(WebSocketSession session, JsonNode root) {
         Player player = gameWorld.getPlayer(session.getId());
-        if (player == null) {
+        if (player == null || !player.isAlive()) {
             return;
         }
         player.updateRotateInput(root.get("angle").asDouble());
@@ -124,6 +124,7 @@ public class GameWebSocketHandler extends AbstractWebSocketHandler {
         if (isSucceeded) {
 
             WebSocketSession decoratedSession = new ConcurrentWebSocketSessionDecorator(session, 10000, 512 * 1024);
+            sessions.removeIf(s -> s.getId().equals(session.getId()));
             sessions.add(decoratedSession);
 
             // one time welcome packet
