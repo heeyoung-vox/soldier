@@ -31,3 +31,7 @@ tasks.withType<Test> {
 tasks.named("jar") {
     enabled = false
 }
+
+tasks.withType<org.springframework.boot.gradle.tasks.run.BootRun> {
+	args("--debug=true")
+}

@@ -14,7 +14,6 @@ import heeyoung.soldier.helper.*;
 public class GameMechanicService {
     GameWorld gameWorld;
     private final AtomicLong bulletIdCounter = new AtomicLong(0);
-    private final AtomicLong scoreIdCounter = new AtomicLong(0);
 
     private final double BULLET_SPEED = 15;
     private final int BULLET_REMAINING_TIME = 30; // tick

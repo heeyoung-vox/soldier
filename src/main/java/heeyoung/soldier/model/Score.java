@@ -1,14 +1,18 @@
 package heeyoung.soldier.model;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class Score {
+    private static final AtomicLong scoreIdCounter = new AtomicLong(0);
+
     private final String id;
     private final ScoreType type;
     private double x;
     private double y;
     private int currentHealth;
 
-    public Score(String id, ScoreType type, double x, double y) {
-        this.id = id;
+    public Score(ScoreType type, double x, double y) {
+        this.id = String.valueOf(scoreIdCounter.getAndIncrement());
         this.type = type;
         this.x = x;
         this.y = y;

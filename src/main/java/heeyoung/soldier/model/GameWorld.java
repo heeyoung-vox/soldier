@@ -106,10 +106,7 @@ public class GameWorld {
 
             double distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < MIN_SPAWN_DISTANCE) {
-                status = false;
-                break;
-            }
+            
         }
 
         return status;

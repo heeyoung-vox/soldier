@@ -31,7 +31,6 @@ public class CollisionService {
                     double currentHealth = stat.getCurrentHealth();
                     double newHealth = Math.clamp(currentHealth - bullet.getDamage(), 0, maxHealth);
                     player.updatePlayerStat(new PlayerStat(maxHealth, newHealth, stat.getReloadTime()));
-                    gameWorld.removeBullet(bullet.getId());
                 }
             }
         }
