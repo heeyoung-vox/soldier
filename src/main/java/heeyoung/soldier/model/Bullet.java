@@ -88,7 +88,12 @@ public final class Bullet implements Collidable {
     }
 
     @Override
-    public Type getType() {
+    public Type getCollidableType() {
         return Type.BULLET;
     }
+
+    //implement stop bullet logic later
+    public boolean isAlive() {
+        return getRemainingTime() > 0;
+    }    
 }

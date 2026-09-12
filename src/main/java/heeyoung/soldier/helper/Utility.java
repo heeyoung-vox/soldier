@@ -22,4 +22,11 @@ public class Utility {
 
         return new double[] { xNew, yNew };
     }
+
+    public static double[] standardize(double x, double y) {
+        double mag = Math.sqrt(x * x + y * y);
+        if (mag == 0)
+            return new double[] { 0, 0 };
+        return new double[] { x / mag, y / mag };
+    }
 }

@@ -11,21 +11,51 @@ import heeyoung.soldier.model.Bullet;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 import heeyoung.soldier.model.PlayerStat;
+import heeyoung.soldier.model.Score;
 
 @Service
 public class CollisionService {
-    private final Map<String, Collidable> collidables = new ConcurrentHashMap<>();
     GameWorld gameWorld;
 
     CollisionService(GameWorld gameWorld) {
         this.gameWorld = gameWorld;
     }
 
+    
+    public boolean checkCollisionAgainstPlayers(Collidable object) {
+        for (Player player : gameWorld.getAllPlayers().values()) {
+            if (player.isAlive() && checkCollision(player, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean checkCollisionAgainstScores(Collidable object) {
+        for (Score score : gameWorld.getAllScores().values()) {
+            if (score.isAlive() && checkCollision(score, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean checkCollisionAgainstBullets(Collidable object) {
+        for (Bullet bullet : gameWorld.getAllBullets().values()) {
+            if (bullet.isAlive() && checkCollision(bullet, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void processCollision() {
         // check player vs bullet
         for (Player player : gameWorld.getAllPlayers().values()) {
             for (Bullet bullet : gameWorld.getAllBullets().values()) {
-                if (player.isAlive() && checkCollision(player, bullet) && !bullet.getOwnerId().equals(player.getId())) {
+                if (player.isAlive()
+                     && checkCollision(player, bullet) 
+                    && !bullet.getOwnerId().equals(player.getId())
+                    && bullet.isAlive() 
+                ) {
                     PlayerStat stat = player.getPlayerStat();
                     double maxHealth = stat.getMaxHealth();
                     double currentHealth = stat.getCurrentHealth();

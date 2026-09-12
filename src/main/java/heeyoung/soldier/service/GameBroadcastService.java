@@ -86,6 +86,10 @@ public class GameBroadcastService {
                 .map(b -> new heeyoung.soldier.dto.BulletDto(b.getId(), b.getX(), b.getY()))
                 .toList();
 
+        var scores = gameWorld.getAllScores().values().stream()
+                .map(s -> s.toScoreDto())
+                .toList();
+
         if (players.size() == 0) {
             gameWorld.resetTick();
             return;
@@ -95,6 +99,7 @@ public class GameBroadcastService {
         messagePayload.put("type", "WORLD_STATE");
         messagePayload.put("players", players);
         messagePayload.put("bullets", bullets);
+        messagePayload.put("scores", scores);
         messagePayload.put("tick", gameWorld.incrementAndGetTick());
         String broadcastPayload = mapper.writeValueAsString(messagePayload);
         for (WebSocketSession session : GameWebSocketHandler.getSessions()) {

@@ -2,7 +2,6 @@ package heeyoung.soldier.service.Collision;
 
 import java.util.List;
 import heeyoung.soldier.model.Position;
-import heeyoung.soldier.service.Collision.Type;
 
 public interface Collidable {
     double getAngle();
@@ -11,5 +10,5 @@ public interface Collidable {
 
     List<BoundingCircle> getBoundingCircles();
 
-    Type getType();
+    Type getCollidableType();
 }

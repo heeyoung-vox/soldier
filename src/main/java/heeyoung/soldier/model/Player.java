@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import heeyoung.soldier.helper.Utility;
 import heeyoung.soldier.service.Collision.*;
 
 public class Player implements Collidable {
@@ -13,7 +14,14 @@ public class Player implements Collidable {
     private final String name;
 
     private final List<BoundingCircle> circles;
+    private final AtomicReference<Position> position = new AtomicReference<>(new Position(0, 0));
 
+    // --- Shot cooldown: atomic check-and-update, no double-fire race ---
+    private final AtomicLong lastShotTime = new AtomicLong(-1);
+
+    private final AtomicReference<PlayerInput> playerInput = new AtomicReference<>(new PlayerInput());
+    private final AtomicReference<PlayerStat> stat = new AtomicReference<>(new PlayerStat());
+    
     public Player(String id, String name) {
         this.id = id;
         this.name = name;
@@ -30,7 +38,7 @@ public class Player implements Collidable {
         return name;
     }
 
-    private final AtomicReference<Position> position = new AtomicReference<>(new Position(0, 0));
+    
 
     @Override
     public Position getPosition() {
@@ -41,8 +49,7 @@ public class Player implements Collidable {
         position.set(new Position(x, y));
     }
 
-    // --- Shot cooldown: atomic check-and-update, no double-fire race ---
-    private final AtomicLong lastShotTime = new AtomicLong(-1);
+    
 
     public long getLastShotTime() {
         return lastShotTime.get();
@@ -59,8 +66,7 @@ public class Player implements Collidable {
         return false; // still on cooldown
     }
 
-    private final AtomicReference<PlayerInput> playerInput = new AtomicReference<>(new PlayerInput());
-    private final AtomicReference<PlayerStat> stat = new AtomicReference<>(new PlayerStat());
+    
 
     public PlayerInput getPlayerInput() {
         return playerInput.get();
@@ -68,7 +74,10 @@ public class Player implements Collidable {
 
     public void updateMoveInput(double dx, double dy) {
         PlayerInput current = playerInput.get();
-        while (!playerInput.compareAndSet(current, new PlayerInput(dx, dy, current.getAngle(), current.isShooting()))) {
+        double[] standardized = Utility.standardize(dx, dy);
+        double x = standardized[0];
+        double y = standardized[1];
+        while (!playerInput.compareAndSet(current, new PlayerInput(x, y, current.getAngle(), current.isShooting()))) {
             current = playerInput.get();
         }
     }
@@ -105,7 +114,7 @@ public class Player implements Collidable {
     }
 
     @Override
-    public Type getType() {
+    public Type getCollidableType() {
         return Type.PLAYER;
     }
 
