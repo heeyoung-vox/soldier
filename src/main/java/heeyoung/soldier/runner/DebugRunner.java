@@ -25,7 +25,7 @@ public class DebugRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         log.info("DebugRunner started (debug mode enabled).");
         
-        Score test = new Score(ScoreType.Blue, 0, 0);
+        Score test = new Score(ScoreType.Blue, 1000, 1000);
         gameWorld.addScore(test);
     }
 }

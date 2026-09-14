@@ -18,6 +18,7 @@ public class Player implements Collidable {
 
     // --- Shot cooldown: atomic check-and-update, no double-fire race ---
     private final AtomicLong lastShotTime = new AtomicLong(-1);
+    private final AtomicLong points = new AtomicLong(0);
 
     private final AtomicReference<PlayerInput> playerInput = new AtomicReference<>(new PlayerInput());
     private final AtomicReference<PlayerStat> stat = new AtomicReference<>(new PlayerStat());
@@ -111,6 +112,19 @@ public class Player implements Collidable {
         while (!stat.compareAndSet(current, newStat)) {
             current = stat.get();
         }
+    }
+
+    public long getPoints() {
+        return points.get();
+    }
+
+    public boolean addPoints(long additionalPoints) {
+        long current = this.points.get();
+        while (!this.points.compareAndSet(current, current + additionalPoints)) {
+            current = this.points.get();
+            return true;
+        }   
+        return false;
     }
 
     @Override

@@ -64,6 +64,16 @@ public class CollisionService {
                 }
             }
         }
+        //check bullet vs score
+        for (Bullet bullet : gameWorld.getAllBullets().values()) {
+            for (Score score : gameWorld.getAllScores().values()) {
+                if (bullet.isAlive() && checkCollision(bullet, score)) {
+                    bullet.die();
+                    score.die();
+                    gameWorld.getPlayer(bullet.getOwnerId()).updatePoints(score.getPoints());
+                }
+            }
+        }
     }
 
     private boolean checkCollision(Collidable objectA, Collidable objectB) {
