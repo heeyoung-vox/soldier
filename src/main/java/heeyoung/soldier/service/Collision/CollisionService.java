@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import heeyoung.soldier.helper.Utility;
 import heeyoung.soldier.model.Bullet;
+import heeyoung.soldier.model.DamageResult;
 import heeyoung.soldier.model.GameWorld;
 import heeyoung.soldier.model.Player;
 import heeyoung.soldier.model.PlayerStat;
@@ -55,7 +56,9 @@ public class CollisionService {
                      && checkCollision(player, bullet) 
                     && !bullet.getOwnerId().equals(player.getId())
                     && bullet.isAlive() 
+                    && !bullet.hasHitEntity(player.getId())
                 ) {
+                    bullet.addHitEntity(player.getId());
                     PlayerStat stat = player.getPlayerStat();
                     double maxHealth = stat.getMaxHealth();
                     double currentHealth = stat.getCurrentHealth();
@@ -67,10 +70,17 @@ public class CollisionService {
         //check bullet vs score
         for (Bullet bullet : gameWorld.getAllBullets().values()) {
             for (Score score : gameWorld.getAllScores().values()) {
-                if (bullet.isAlive() && checkCollision(bullet, score)) {
-                    bullet.die();
-                    score.die();
-                    gameWorld.getPlayer(bullet.getOwnerId()).updatePoints(score.getPoints());
+                if (score.isAlive() && checkCollision(bullet, score) && !bullet.hasHitEntity(score.getId())) {
+                    DamageResult result =  score.applyDamage(bullet.getDamage());
+                    if (result.wasHit())
+                        bullet.addHitEntity(score.getId());
+                    if (result.lethalBlow() && result.wasHit()) {
+                        try {
+                            gameWorld.getPlayer(bullet.getOwnerId()).addPoints((long) score.type.scoreValue);
+                        } catch (NullPointerException e) {
+                            // Player no longer exists in gameWorld
+                        }
+                    }
                 }
             }
         }

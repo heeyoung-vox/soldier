@@ -2,6 +2,7 @@ package heeyoung.soldier.model;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import heeyoung.soldier.service.Collision.Collidable;
 import heeyoung.soldier.service.Collision.Type;
@@ -11,10 +12,10 @@ public class Score implements Collidable {
     private static final AtomicLong scoreIdCounter = new AtomicLong(0);
 
     private final String id;
-    private final ScoreType type;
+    public final ScoreType type;
     private double x;
     private double y;
-    private int currentHealth;
+    private final AtomicReference<Double> currentHealth;
     private final List<BoundingCircle> circles;
 
     public Score(ScoreType type, double x, double y) {
@@ -22,7 +23,7 @@ public class Score implements Collidable {
         this.type = type;
         this.x = x;
         this.y = y;
-        this.currentHealth = type.maxHealth;
+        this.currentHealth= new AtomicReference<Double>(type.maxHealth);
         this.circles = List.of(new BoundingCircle(0.0, 0.0, type.radius));
     }
 
@@ -34,8 +35,18 @@ public class Score implements Collidable {
         this.y = y;
     }
 
-    public void setCurrentHealth(int currentHealth) {
-        this.currentHealth = currentHealth;
+    public DamageResult applyDamage(double damage) {
+        
+        double prev = currentHealth.getAndUpdate(current -> {
+            if (current <= 0) return current; 
+            return Math.max(0, current - damage);
+        });
+        if (prev <= 0) {
+            return new DamageResult(0, false, false); 
+        }
+        double next = Math.max(0, prev - damage);
+        boolean lethality = (next == 0); 
+        return new DamageResult(next, lethality, true);
     }
 
     public String getId() {
@@ -54,8 +65,8 @@ public class Score implements Collidable {
         return y;
     }
 
-    public int getCurrentHealth() {
-        return currentHealth;
+    public double getCurrentHealth() {
+        return currentHealth.get();
     }
 
     @Override
@@ -79,14 +90,14 @@ public class Score implements Collidable {
     }
 
     public boolean isAlive() {
-        return currentHealth > 0;
+        return currentHealth.get() > 0;
     }
 
     public heeyoung.soldier.dto.ScoreDto toScoreDto() {
         return switch (type) {
-            case Yellow -> new heeyoung.soldier.dto.ScoreDto(id, "yellow", x, y, currentHealth);
-            case Maroon -> new heeyoung.soldier.dto.ScoreDto(id, "maroon", x, y, currentHealth);
-            case Blue -> new heeyoung.soldier.dto.ScoreDto(id, "blue", x, y, currentHealth);
+            case Yellow -> new heeyoung.soldier.dto.ScoreDto(id, "yellow", x, y, currentHealth.get());
+            case Maroon -> new heeyoung.soldier.dto.ScoreDto(id, "maroon", x, y, currentHealth.get());
+            case Blue -> new heeyoung.soldier.dto.ScoreDto(id, "blue", x, y, currentHealth.get());
         };
     }
 }

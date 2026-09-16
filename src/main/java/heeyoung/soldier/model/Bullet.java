@@ -1,6 +1,8 @@
 package heeyoung.soldier.model;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import heeyoung.soldier.service.Collision.Collidable;
@@ -15,6 +17,7 @@ public final class Bullet implements Collidable {
     private final String ownerId;
     private final AtomicReference<BulletStat> stat;
     private final List<BoundingCircle> circles;
+    private final Set<String> hitIds = ConcurrentHashMap.newKeySet();
 
     public record BulletStat(double x, double y, double vx, double vy, int remainingTime, double damage) {
     }
@@ -96,4 +99,12 @@ public final class Bullet implements Collidable {
     public boolean isAlive() {
         return getRemainingTime() > 0;
     }    
+
+    public void addHitEntity(String entityId) {
+        hitIds.add(entityId);
+    }
+
+    public boolean hasHitEntity(String entityId) {
+        return hitIds.contains(entityId);
+    }
 }

@@ -6,5 +6,6 @@ public record PlayerDto(String id,
         double y,
         double angle,
         double maxHealth,
-        double currentHealth) {
+        double currentHealth,
+        double points) {
 }

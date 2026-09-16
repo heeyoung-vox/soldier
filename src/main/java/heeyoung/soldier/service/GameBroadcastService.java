@@ -64,12 +64,17 @@ public class GameBroadcastService {
             }
         }
 
-        // remove expired bullet
+        // remove expired bullets
         gameWorld.getAllBullets().values().forEach(b -> {
             if (b.getRemainingTime() <= 0) {
                 gameWorld.removeBullet(b.getId());
             }
         });
+
+        // remove dead scores
+        gameWorld.getAllScores().values().stream()
+                .filter(s -> !s.isAlive())
+                .forEach(s -> gameWorld.removeScore(s.getId()));
 
         var players = gameWorld.getAllPlayers().values().stream()
                 .map(p -> {
@@ -79,7 +84,8 @@ public class GameBroadcastService {
                             p.getId(), p.getName(), pos.x(), pos.y(),
                             p.getPlayerInput().getAngle(),
                             stat.getMaxHealth(),
-                            stat.getCurrentHealth());
+                            stat.getCurrentHealth(),
+                            p.getPoints());
                 })
                 .toList();
         var bullets = gameWorld.getAllBullets().values().stream()

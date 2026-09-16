@@ -5,8 +5,8 @@ public enum ScoreType {
     Maroon(20, 20, 22.5),
     Blue(30, 30, 45);
 
-    public final int maxHealth;
-    public final int scoreValue;
+    public final double maxHealth;
+    public final double scoreValue;
     public final double radius;
 
     ScoreType(int maxHealth, int scoreValue, double radius) {
